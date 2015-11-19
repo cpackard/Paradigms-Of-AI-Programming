@@ -29,12 +29,39 @@
 ;; Use the built-in function princ to print each component of the expression.
 
 (defun print-dotted-pair (lst)
+  (print-dotted-pair-iter lst 0))
+
+(defun print-dotted-pair-iter (lst count)
   (cond ((null lst)
          (princ '()))
         ((null (rest lst))
-         (princ lst))
+         (princ lst)
+         ; close out the remaining parentheses
+         (dotimes (x count)
+           (princ ")")))
         (t
-         )))
+         (princ "(") 
+         ; check if we need to recurse
+         (if (consp (first lst))
+             (print-dotted-pair-iter (first lst) 0)
+             (princ (first lst)))
+         (princ " . ") 
+         (print-dotted-pair-iter (rest lst) (1+ count)))))
+
+;; This version is cleaner, but much less efficient
+(defun clean-print-dotted-pair (Lst)
+  (let ((elem-last (last lst))
+        (lst-no-last (butlast lst)))
+    (mapc #'(lambda (x)
+              (if (consp x)
+                  (progn
+                    (better-print x) (princ " . "))
+                  (progn
+                    (princ "(") (princ x) (princ " . "))))
+          lst-no-last)
+    (princ elem-last)
+    (dotimes (x (1- (length lst)))
+      (princ ")"))))
 
 ;;
 ;; Exercise 3.4 [m]
@@ -43,6 +70,33 @@
 ;; in dotted pair notation when necessary but will use normal list notation
 ;; when possible
 
+(defun print-normal-when-possible (lst)
+  (print-normal-when-possible-iter lst 0))
+
+
+; TODO: finish this
+(defun print-normal-when-possible-iter (lst count)
+  (cond ((null lst)
+         (princ '()))
+        ((null (rest lst))
+         (princ lst)
+         (dotimes (x count)
+           (princ ")")))
+        (t
+         (if (consp (first lst))
+             (print-normal-when-possible-iter (first lst) 0)
+             (progn
+               (princ "(")
+               (princ (first lst))
+               ; check if we need to convert to dotted notation
+               (if (not (consp (rest lst)))
+                   (progn
+                     (princ " . ")
+                     (princ (second lst))
+                     (princ ")"))
+                   (progn
+                     (princ " ") 
+                     (print-normal-when-possible-iter (rest lst) (1+ count)))))))))
 
 
 ;; Exercise 3.5 [h]
@@ -109,8 +163,9 @@
 ;;
 ;; Write a version of length using the function 'reduce'
 
-(defun length10 (lst)
-  (reduce #'(lambda (elem) (count (list elem)))))
+
+
+
 
 
 
