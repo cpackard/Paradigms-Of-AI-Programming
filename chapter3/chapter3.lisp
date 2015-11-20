@@ -83,20 +83,27 @@
          (dotimes (x count)
            (princ ")")))
         (t
-         (if (consp (first lst))
-             (print-normal-when-possible-iter (first lst) 0)
-             (progn
-               (princ "(")
-               (princ (first lst))
-               ; check if we need to convert to dotted notation
-               (if (not (consp (rest lst)))
-                   (progn
-                     (princ " . ")
-                     (princ (second lst))
-                     (princ ")"))
-                   (progn
-                     (princ " ") 
-                     (print-normal-when-possible-iter (rest lst) (1+ count)))))))))
+         (princ "(")
+         (let ((prev-elem (first lst))
+               (current-list (rest lst)))
+           (if (listp current-list)
+               (progn
+                 (dotimes (i (length current-list))
+                   (if (listp current-list)
+                       (if (listp prev-elem)
+                           (progn
+                             (print-normal-when-possible prev-elem)
+                             (princ " "))
+                           (progn
+                             (princ prev-elem) (princ " ")))
+                       (progn
+                         (princ " . ") (princ current-list)))
+                   (setf prev-elem (first current-list))
+                   (setf current-list (rest current-list)))
+                 (princ prev-elem) (princ ")"))
+               (progn
+                 (princ " . " (princ current-list))))))))
+
 
 
 ;; Exercise 3.5 [h]
