@@ -70,41 +70,42 @@
 ;; in dotted pair notation when necessary but will use normal list notation
 ;; when possible
 
-(defun print-normal-when-possible (lst)
-  (print-normal-when-possible-iter lst 0))
-
-
-; TODO: finish this
-(defun print-normal-when-possible-iter (lst count)
+(defun print-normal (lst)
   (cond ((null lst)
          (princ '()))
         ((null (rest lst))
-         (princ lst)
-         (dotimes (x count)
-           (princ ")")))
+         (princ lst))
         (t
-         (princ "(")
-         (let ((prev-elem (first lst))
-               (current-list (rest lst)))
-           (if (listp current-list)
-               (progn
-                 (dotimes (i (length current-list))
-                   (if (listp current-list)
-                       (if (listp prev-elem)
-                           (progn
-                             (print-normal-when-possible prev-elem)
-                             (princ " "))
-                           (progn
-                             (princ prev-elem) (princ " ")))
-                       (progn
-                         (princ " . ") (princ current-list)))
-                   (setf prev-elem (first current-list))
-                   (setf current-list (rest current-list)))
-                 (princ prev-elem) (princ ")"))
-               (progn
-                 (princ " . " (princ current-list))))))))
+         (let ((elem (first lst))
+               (next-lst (rest lst)))
+           (princ "(")
+           (dotimes (x (length-dotted-pair lst)) 
+             (cond ((not (listp next-lst)) ; dotted list
+                    (princ elem) (princ " . ") (princ next-lst) (princ ")")
+                    (return))
+                   ; case where first element is also a list
+                   ((listp elem)
+                    (print-normal elem)
+                    (if (null next-lst)
+                        (princ ")")
+                        (princ " ")))
+                   ; end of list, terminate
+                   ((null next-lst)
+                    (princ elem) (princ ")"))
+                   (t ; normal case
+                    (princ elem ) (princ " ")))
+             (setq elem (first next-lst))
+             (setq next-lst (rest next-lst)))))))
 
+(defun length-dotted-pair (lst)
+  "Find the length of the input list, even if it has a dotted pair inside."
+  (length-dotted-pair-iter lst 0))
 
+(defun length-dotted-pair-iter (lst count)
+  (cond ((null lst) count)
+        ((not (listp lst)) (1+ count))
+        (t
+         (length-dotted-pair-iter (rest lst) (1+ count)))))
 
 ;; Exercise 3.5 [h]
 ;;
@@ -163,6 +164,15 @@
 ;; for the same keyword.
 ;; Change the definition of find-all so that it works in KCL.
 
+(defun find-all (item sequence &rest keyword-args
+                                 &key (test #'eql) test-not &allow-other-keys)
+  "Find all those elements of sequence that match item, according to keywords.
+   Doesn't alter sequence."
+  (if test-not
+      (apply #'remove item sequence
+             (append keyword-args (list :test-not (complement test-not))))
+      (apply #'remove item sequence
+             (append keyword-args (list :test (complement test))))))
 
 
 ;;
@@ -170,19 +180,40 @@
 ;;
 ;; Write a version of length using the function 'reduce'
 
+;; My version
+;;
+(defun length-reduce (lst)
+  (if (null lst)
+      0
+      (let ((count 1))
+        (reduce #'(lambda (x y) (setq count (1+ count))) lst))))
 
-
-
-
+;; Answer in book 
+(defun length-r (lst)
+  (reduce #'+ lst :key #'(lambda (x) 1)))
 
 
 ;;
 ;; Exercise 3.10 [m]
 ;
 ;; Use a reference manual or 'describe' to figure out what the functions
-;; '?????' and 'nreconc' do.
+;; 'lcm' and 'nreconc' do.
 
+;; (documentation #'lcm 'function)
+;; Returns the least common multiple of one or more integers.
+;; LCM of no arguments is defined to be 1.
 
+;; (documentation #'nreconc 'function)
+;; Return (NCONC (NREVERSE X) Y)
+
+;; (documentation #'nconc 'function)
+;; Concatenates the lists given as arguments (by changing them)
+;; (documentatio #'nreverse 'function)
+;; Return a sequence of the same elements in reverse order; the argument is destroyed.
+
+;; So an explicit definition of nreconc:
+;; Reverses the first argument, concatenates it with the second argument, and returns 
+;; that sequence. Alters the arguments.
 
 ;; 
 ;; Exercise 3.11 [m]
@@ -191,6 +222,10 @@
 ;; and an association list, returns a new association list that is extended
 ;; to include the key/value pair. What is the name of this function?
 
+;; Answer: acons
+;; (documentation #'acons 'function)
+;; Construct a new alist by adding the pair (KEY . DATUM) to ALIST
+;; (acons key datum alist) == (cons (cons key datum) alist)
 
 
 ;; Exercise 3.12 [m]
@@ -199,3 +234,6 @@
 ;; words and print them as a sentence, with the first word capitalized
 ;; and a period after the last word. You will have to consult a 
 ;; reference to learn new format directives.
+
+;; Book answer:
+;; (format t "~@(~{~a~^ ~}.~)" '(this is a test))
