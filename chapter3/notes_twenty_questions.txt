@@ -1,0 +1,49 @@
+Notes for the Twenty Questions Program:
+
+Start w/ an assoc lit of categories & how many tagged with that category,
+as well as total # of entries.
+   - For each round, pick a category whose total is closest to half the number
+     of entries remaining
+
+Q: What if you run out of guesses and there are multiple options left?
+
+A: Pick one at random, and increase its probability for next time
+
+Q: How do you keep track of all those different branches & probabilities?
+   - can't just keep a list of "Human -> Animal -> Dog [Lab: 0, Retriever: 2]"
+     b/c that list-of-lists would grow exponentially with the number of categories
+
+A: With each entry, assign a weighted score and pick one with the highest score
+   - Score based on how many tiems it's been correct
+     - Add to weighted score when it's correct
+     - Penalize score of the chose entry if the agent guesses incorrectly
+     - Give a higher weight to recently correct entries
+
+Q: Shouldn't the agent be able to ask better questions after it learns the user behavior?
+   - Categories should have weighted score as well, in order to drill down faster
+
+A: Walk before you run, but we'll build so we can add that later.
+   
+Q: Okay, describe the data structures involved.
+
+A: Data Structures:
+   Categories(list): (category . numberOfEntries)
+   Entries(hashmap): entry -> categories(list)
+                              # of times correct (int)
+                              chosen last 10 times (list of 10 booleans)
+
+Q: Seems wasteful, you're using twice the space you need with the categories
+
+A: Well we have to pick from categories for the questions. And we never change an entry's
+   category, so there's no risk of inconsistent data.
+
+Q: Really? Never update an entry's category? What if we have:
+   Round 1: Human -> Male -> Family -> Grandpa (correct)
+   Round 2: Human -> Male -> Family -> Grandpa (incorrect)
+         Actual: Dad (Dad has blonde hair)
+  
+  Shouldn't we update Grandpa with a 'hair' category?
+
+A: TODO:
+   1. Give categories weighted score
+   2. Figure out how to add category to existing entry

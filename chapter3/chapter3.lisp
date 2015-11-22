@@ -117,6 +117,7 @@
 ;; At first the program will not play well, but each time it plays, it will remember
 ;; the user's replies and use them for subsequent guesses.
 
+;; See TwentyQuestions.lisp 
 
 
 ;;
