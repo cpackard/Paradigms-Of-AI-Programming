@@ -44,6 +44,19 @@ Q: Really? Never update an entry's category? What if we have:
   
   Shouldn't we update Grandpa with a 'hair' category?
 
+A: Okay, but how would we do that?
+   - We can't go back and annotate every entry, it might not even be relevant
+     - ex: Dad has blonde hair, so we add a 'Hair color' category.
+           But that only make sense for entries with hair to begin with.
+
+   - NEW IDEA: Start with a list of entries and each has a list of pre-defined categories
+     - When the correct answer is an entry the agent doesn't know, the user supplies
+         the correct categories (agent asks "Huh, I don't know what that is, can you
+                                              describe it for me?")
+     - If the correct answer is an entry we have but didn't guess b/c of unknown 
+       categories, the agent asks the user to update the entry with the new categories
+
 A: TODO:
    1. Give categories weighted score
    2. Figure out how to add category to existing entry
+
