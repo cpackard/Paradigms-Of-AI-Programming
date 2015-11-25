@@ -56,7 +56,21 @@ A: Okay, but how would we do that?
      - If the correct answer is an entry we have but didn't guess b/c of unknown 
        categories, the agent asks the user to update the entry with the new categories
 
+A: Data Structures (revised):
+   Entries (hashmap): entry (structure) -> categories (list)
+                                           # of times correct (int)
+                                           chosen last 10 times (list of 10 booleans)
+   
+   AllCategories (assoc list): (category . numberOfEntries)
+
+   At the start of each the program, the agent will scan all entries for categories
+   and build the initial list.
+     - From this list it will see which question has the best chance of narrowing down
+       the possibilities.
+     - As the agent plays several games and new entries are added, it will also update the
+       AllCategories list   
+
 A: TODO:
    1. Give categories weighted score
-   2. Figure out how to add category to existing entry
+   2. Figure out how to ask better line-of-questioning, given weighted category scores.
 
